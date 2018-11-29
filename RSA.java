@@ -184,5 +184,96 @@ public class RSA {
         return result;
 
     }
+     /***
+     * Display an array of longs on stdout
+     * @param cipher cipher code to be displayed
+     * @author Jamie Walder
+     */
+    public static void show(long[] cipher) {
+    	System.out.println(Arrays.toString(cipher));
+    }
+    /***
+     * Find a random prime number
+     * @author Jamie Walder
+     * @param m lower range of prime
+     * @param n uper range of prime
+     * @param rand a random prime number
+     * @return A random prime in the range m..n, using rand to generate the number
+     * @throws Exception an exception thrown if the range does not contain a prime number
+     */
+    public static long randPrime(int m,int n,java.util.Random rand) throws Exception {
+    	if(m>n) {
+    		throw new IllegalArgumentException("m must be less than n");
+    	}
+    	int original=99;//rand.nextInt(n-m)+m;
+    	//takes care of even 
+    	if(original%2==0) {
+    		original+=1;
+    	}
+    	int go=0;
+    	for(int num=original;go<2;num=(num+2)) {
+    		if(num>n) {
+    			num=m%2==0?m+1:m;
+    		}
+    		if(num==original) {
+    			go++;
+    		}
+    		//an unfortunate consequence of jumping all the evens
+    		if(num==3) {
+    			return num;
+    		}
+    		for(int i=3;i<num;i+=2) {
+    			if(num%i==0) {
+    				break;
+    			}
+    			else if(i==num-2){
+    				return num;
+    			}
+    		}
+    		
+    	}
+    	throw new Exception("No Random in given Range");
+    }
+    /***
+     * Find a random number relatively prime to a given long int
+     * @author Jamie Walder
+     * @param n first number 
+     * @param rand a random number that is relatively prime to n
+     * @return a random number relatively prime to n
+     */
+    public static long relPrime(long n,java.util.Random rand) {
+    	long num=rand.nextLong();
+    	if(num<0) {
+    		num*=-1;
+    	}
+    	num%=n;
+    	if(num==0) {
+    		num++;
+    	}
+    	
+    	while(gcd(n,num)>1) {
+    		num+=1%n;
+    	}
+    	return num;
+    }
+    /***
+     * @author Jamie Walder
+     * Convert two numeric chars to long int
+     * @param msg the message we need the number from
+     * @param p the position to create the int from
+     * @return the two digit number beginning at position p of msg as a long int.
+     */
+    public static long toLong(java.lang.String msg,int p) {
+    	return Long.parseLong(""+msg.toCharArray()[p]+msg.toCharArray()[p+1]);
+    }
+    /***
+     * Convert a long to 2 chars
+     * @author Jamie Walder
+     * @param x 
+     * @return The string made up two numeric digits representing x
+     */
+    public static java.lang.String longTo2Chars(long x){
+    	return new Long(x).toString();
+    }
 
 }
