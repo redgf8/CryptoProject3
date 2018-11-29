@@ -9,16 +9,19 @@ public class RSA {
      */
     public static long inverse(int e, int m) throws IllegalArgumentException {
 
-        //check for invalid mod input
+        //TODO: change implementation to stack?
+        //TODO: implement functionality for negative e?
+
+        //check for invalid input
         if (m < 1) {
 
-            throw new IllegalArgumentException("Given mod (" + m + ") is not valid: mod must be > 0");
+            throw new IllegalArgumentException("Given value for m (" + m + ") is not valid: modulo must be > 0");
 
         }
 
         if (e < 1) {
 
-            throw new IllegalArgumentException("Given number (" + e + ") is not valid: number must be > 0");
+            throw new IllegalArgumentException("Given value for e (" + e + ") is not valid: number must be > 0");
 
         }
 
@@ -48,41 +51,35 @@ public class RSA {
         r[1] = e;
         r[2] = (m % e);
         q[2] = (m / e);
-        u[0] = 0;
         u[1] = 1;
         v[0] = 1;
-        v[1] = 0;
 
-        //repeated steps
-        int position = 2;
-        while (r[position%3] != 1) {
+        //repeated steps, loop runs until remainder is one
+        int position = 2; //used for backtracking from the current index without rearranging array each time by using mod
+        int positionMod = 2; //keeps track of actual index of current values
+        while (r[positionMod] != 1) {
 
             //set u and v values for this round
-            u[position%3] = (u[(position-2)%3] - (q[position%3] * u[(position-1)%3]));
-            v[position%3] = (v[(position-2)%3] - (q[position%3] * v[(position-1)%3]));
+            u[positionMod] = (u[(position-2)%3] - (q[position%3] * u[(position-1)%3]));
+            v[positionMod] = (v[(position-2)%3] - (q[position%3] * v[(position-1)%3]));
 
             //advance position and calculate r and q for next round
             position++;
+            positionMod = position % 3;
 
-            System.out.println("r: " + r[(position-1)%3]);
-            r[position%3] = (r[(position-2)%3] % r[(position-1)%3]);
-            r[position%3] = (r[(position-2)%3] / r[(position-1)%3]);
-
-        }
-
-        while (u[2] < 0) {
-
-            u[2] += m;
+            r[positionMod] = (r[(position-2)%3] % r[(position-1)%3]);
+            q[positionMod] = (r[(position-2)%3] / r[(position-1)%3]);
 
         }
 
-        if (u[2] > m) {
+        //perform u and v calculations one more time after remainder is 1 to get result
+        u[positionMod] = (u[(position-2)%3] - (q[position%3] * u[(position-1)%3]));
+        v[positionMod] = (v[(position-2)%3] - (q[position%3] * v[(position-1)%3]));
 
-            u[2] = (u[2] % m);
+        //make sure the result is within the modular limits
+        u[positionMod] = trueMod(u[positionMod], m);
 
-        }
-
-        return u[2];
+        return u[positionMod];
 
     }
 
@@ -94,31 +91,97 @@ public class RSA {
      * @return b^p mod m
      * @author Daniel Haluszka
      */
-    public static long modPower(int b, int p, int m) {
+    public static long modPower(long b, long p, long m) throws IllegalArgumentException {
 
-        return 0;
+        //TODO: check for overflow?
+
+        //check for invalid input
+        if (p < 0) {
+
+            throw new IllegalArgumentException("Given value for p (" + p + ") is not valid: p must be positive");
+
+        }
+
+        //check for simple cases
+        if (p == 0) {
+
+            return 1;
+
+        }
+
+        if (p == 1) {
+
+            return b%m;
+
+        }
+
+        long result = b;
+
+        //multiply b by itself p times, reducing mod m at each step
+        for (int i = 0; i <= p; i++) {
+
+            result *= b;
+            result = (result % m);
+
+        }
+
+        return result;
 
     }
 
     /**
-     * @param a
-     * @param b
-     * @return The greatest common denominator of parameters a and b.
+     * Find the greatest common denominator of two numbers.
+     * @param a First number to find gcd of with b
+     * @param b Second number to find gcd of with a
+     * @return The greatest common denominator of parameters a and b. Uses the Euclidean algorithm.
      * @author Daniel Haluszka
      */
-    private static int gcd(int a, int b) {
+    private static long gcd(long a, long b) {
 
-        int r = (a%b);
+        //find remainder
+        long r = trueMod(a, b);
 
+        //if remainder = 0, b is gcd
         if (r == 0) {
 
             return b;
 
         } else {
 
+            //otherwise recur on b and remainder
             return gcd(b, r);
 
         }
+
+    }
+
+    /**
+     * Adds functionality in modulo for negative numbers.
+     * @param e The modulo operand
+     * @param m The modulo
+     * @return e (mod m)
+     * @author Daniel Haluszka
+     */
+    private static long trueMod(long e, long m) {
+
+        long result = e;
+
+        //check for negative number
+        while (result < 0) {
+
+            //add modulo until positive
+            result += m;
+
+        }
+
+        //perform normal modulo
+        if (result > m) {
+
+            result = (result % m);
+
+        }
+
+        return result;
 
     }
 
