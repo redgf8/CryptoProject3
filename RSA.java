@@ -1,3 +1,7 @@
+package RSA;
+
+import java.util.Arrays;
+
 public class RSA {
 
     /**
@@ -7,7 +11,7 @@ public class RSA {
      * @return The inverse of e, mod m. Uses the extended Euclidean Algorithm. Returns -1 if DNE.
      * @author Daniel Haluszka
      */
-    public static long inverse(int e, int m) throws IllegalArgumentException {
+    public static long inverse(long e, long m) throws IllegalArgumentException {
 
         //TODO: change implementation to stack?
         //TODO: implement functionality for negative e?
@@ -205,7 +209,7 @@ public class RSA {
     	if(m>n) {
     		throw new IllegalArgumentException("m must be less than n");
     	}
-    	int original=99;//rand.nextInt(n-m)+m;
+    	int original=rand.nextInt(n-m)+m;
     	//takes care of even 
     	if(original%2==0) {
     		original+=1;
