@@ -1,7 +1,36 @@
 import java.util.Arrays;
 
 public class RSA {
-
+	public static void main (String args[])
+	{ 	
+			Person Alice = new Person();
+			Person Bob = new Person();
+	
+			String msg = new String ("Bob, let's have lunch."); 	// message to be sent to Bob
+			long []  cipher;
+			cipher =  Alice.encryptTo(msg, Bob);			// encrypted, with Bob's public key
+	
+			System.out.println ("Message is: " + msg);
+			System.out.println ("Alice sends:");
+			show (cipher);
+	
+			System.out.println ("Bob decodes and reads: " + Bob.decrypt (cipher));	// decrypted,
+										// with Bob's private key.
+			System.out.println ();
+			
+			msg = new String ("No thanks, I'm busy");
+			cipher = Bob.encryptTo (msg, Alice);
+			
+			System.out.println ("Message is: " + msg);
+			System.out.println ("Bob sends:");
+			show (cipher);
+	
+			System.out.println ("Alice decodes and reads: " + Alice.decrypt (cipher));
+			
+				
+			
+	
+	}
     /**
      * Find the multiplicative inverse of a long int, mod m
      * @param e The number to find the multiplicative inverse of (modulo m).
@@ -117,10 +146,10 @@ public class RSA {
 
         }
 
-        long result = b;
+        long result = 1;//11^0
 
         //multiply b by itself p times, reducing mod m at each step
-        for (int i = 0; i <= p; i++) {
+        for (int i = 0; i < p; i++) {
 
             result *= b;
             result = (result % m);
@@ -130,6 +159,7 @@ public class RSA {
         return result;
 
     }
+    
 
     /**
      * Find the greatest common denominator of two numbers.
@@ -203,7 +233,7 @@ public class RSA {
      * @return A random prime in the range m..n, using rand to generate the number
      * @throws Exception an exception thrown if the range does not contain a prime number
      */
-    public static long randPrime(int m,int n,java.util.Random rand) throws Exception {
+    public static long randPrime(int m,int n,java.util.Random rand){
     	if(m>n) {
     		throw new IllegalArgumentException("m must be less than n");
     	}
@@ -234,7 +264,13 @@ public class RSA {
     		}
     		
     	}
-    	throw new Exception("No Random in given Range");
+    	try {
+			throw new Exception("No Random in given Range");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return -1;
     }
     /***
      * Find a random number relatively prime to a given long int
@@ -270,7 +306,7 @@ public class RSA {
     		throw new IllegalArgumentException("incoming message should be even in length.");
     	}
     	long temp=(int)msg.toCharArray()[p];
-    	temp=temp<<32;
+    	temp=temp<<8;
     	temp+=(int)msg.toCharArray()[p+1];
     	return temp;
     }
@@ -282,7 +318,8 @@ public class RSA {
      */
     public static java.lang.String longTo2Chars(long x){
     	String temp="";
-    	temp+=(char)(x>>32);
+    	temp+=(char)(x>>8);
+    	x=(long) (x%Math.pow(2, 8));
     	temp+=(char)((int)x);
     	return temp;
     }
