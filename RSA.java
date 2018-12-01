@@ -264,6 +264,9 @@ public class RSA {
      * @return the two digit number beginning at position p of msg as a long int.
      */
     public static long toLong(java.lang.String msg,int p) {
+        if(msg.length()%2!=0) {
+    		throw new IllegalArgumentException("incoming message should be even in length.");
+    	}
     	long temp=(int)msg.toCharArray()[p];
     	temp=temp<<32;
     	temp+=(int)msg.toCharArray()[p+1];
