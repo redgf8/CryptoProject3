@@ -264,7 +264,10 @@ public class RSA {
      * @return the two digit number beginning at position p of msg as a long int.
      */
     public static long toLong(java.lang.String msg,int p) {
-    	return Long.parseLong(""+msg.toCharArray()[p]+msg.toCharArray()[p+1]);
+    	long temp=(int)msg.toCharArray()[p];
+    	temp=temp<<32;
+    	temp+=(int)msg.toCharArray()[p+1];
+    	return temp;
     }
     /***
      * Convert a long to 2 chars
@@ -273,7 +276,10 @@ public class RSA {
      * @return The string made up two numeric digits representing x
      */
     public static java.lang.String longTo2Chars(long x){
-    	return new Long(x).toString();
+    	String temp="";
+    	temp+=(char)(x>>32);
+    	temp+=(char)((int)x);
+    	return temp;
     }
 
 }
