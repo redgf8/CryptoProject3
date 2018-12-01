@@ -1,5 +1,3 @@
-package RSA;
-
 import java.util.Random;
 
 /**
