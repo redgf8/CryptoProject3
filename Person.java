@@ -19,17 +19,17 @@ public class Person extends java.lang.Object {
 	 * @author Brandon Pugh
 	 * @throws Exception 
 	 */
-	public Person() throws Exception{
+	public Person(){
 		//Public Key
 		rand = new Random();
-		p = RSA.randPrime(0, 100, rand);
-		q = RSA.randPrime(0, 100, rand);
+		p = RSA.randPrime(256, 300, rand);
+		while((q = RSA.randPrime(256, 300, rand))==p);
 		m = p*q;
 		n = (p-1)*(q-1);
-		e = RSA.randPrime(0, 100, rand);
+		e = RSA.relPrime(n, rand);
 		
 		//Private Key
-		d = RSA.inverse(e, m);
+		d = RSA.inverse(e, n);
 	}
 	
 	/**
@@ -55,11 +55,14 @@ public class Person extends java.lang.Object {
 	 * @return
 	 */
 	public long[] encryptTo(String msg, Person recipient){
+		if(msg.length()%2!=0) {
+			msg+=(char)0;
+		}
 		long[] cipher = new long[msg.length()/2];
 		long txt;
 		int counter = 0;
-		for(int i = 0; i < msg.length(); i = i++) {
-			txt = RSA.modPower(RSA.toLong(msg, i), recipient.getE(), recipient.getM());
+		for(int i = 0; i < msg.length()/2; i++) {
+			txt = RSA.modPower(RSA.toLong(msg, i*2), recipient.getE(), recipient.getM());
 			cipher[counter] = txt;
 			counter++;
 		}
@@ -72,11 +75,14 @@ public class Person extends java.lang.Object {
 	 * @return
 	 */
 	public String decrypt (long[] message) {
-		String msg = "";
+		String msg = new String();
 		for(int i = 0; i < message.length; i++) {
-			message[i] = RSA.modPower(message[i], d, n);
+			message[i] = RSA.modPower(message[i], d, m);
 			msg = msg + RSA.longTo2Chars(message[i]);
 		}
 		return msg;
 	}
+
+	
+	
 }
