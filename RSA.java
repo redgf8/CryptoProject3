@@ -1,36 +1,37 @@
 import java.util.Arrays;
 
 public class RSA {
-	public static void main (String args[])
-	{ 	
-			Person Alice = new Person();
-			Person Bob = new Person();
-	
-			String msg = new String ("Bob, let's have lunch."); 	// message to be sent to Bob
-			long []  cipher;
-			cipher =  Alice.encryptTo(msg, Bob);			// encrypted, with Bob's public key
-	
-			System.out.println ("Message is: " + msg);
-			System.out.println ("Alice sends:");
-			show (cipher);
-	
-			System.out.println ("Bob decodes and reads: " + Bob.decrypt (cipher));	// decrypted,
-										// with Bob's private key.
-			System.out.println ();
-			
-			msg = new String ("No thanks, I'm busy");
-			cipher = Bob.encryptTo (msg, Alice);
-			
-			System.out.println ("Message is: " + msg);
-			System.out.println ("Bob sends:");
-			show (cipher);
-	
-			System.out.println ("Alice decodes and reads: " + Alice.decrypt (cipher));
-			
-				
-			
-	
-	}
+    public static void main (String args[])
+    {
+        Person Alice = new Person();
+        Person Bob = new Person();
+
+        String msg = new String ("Bob, let's have lunch."); 	// message to be sent to Bob
+        long []  cipher;
+        cipher =  Alice.encryptTo(msg, Bob);			// encrypted, with Bob's public key
+
+        System.out.println ("Message is: " + msg);
+        System.out.println ("Alice sends:");
+        show (cipher);
+
+        System.out.println ("Bob decodes and reads: " + Bob.decrypt (cipher));	// decrypted,
+        // with Bob's private key.
+        System.out.println ();
+
+        msg = new String ("No thanks, I'm busy");
+        cipher = Bob.encryptTo (msg, Alice);
+
+        System.out.println ("Message is: " + msg);
+        System.out.println ("Bob sends:");
+        show (cipher);
+
+        System.out.println ("Alice decodes and reads: " + Alice.decrypt (cipher));
+
+
+
+
+    }
+
     /**
      * Find the multiplicative inverse of a long int, mod m
      * @param e The number to find the multiplicative inverse of (modulo m).
@@ -39,9 +40,6 @@ public class RSA {
      * @author Daniel Haluszka
      */
     public static long inverse(long e, long m) throws IllegalArgumentException {
-
-        //TODO: change implementation to stack?
-        //TODO: implement functionality for negative e?
 
         //check for invalid input
         if (m < 1) {
@@ -56,18 +54,17 @@ public class RSA {
 
         }
 
-        //check for simple case
-        if (m == 1) {
-
-            return 0;
-
-        }
-
-
         //inverse only exists if e and m are relatively prime
         if (gcd(e, m) != 1) {
 
             return -1;
+
+        }
+
+        //check for simple case
+        if (m == 1) {
+
+            return 0;
 
         }
 
@@ -98,7 +95,8 @@ public class RSA {
             position++;
             positionMod = position % 3;
 
-            r[positionMod] = (r[(position-2)%3] % r[(position-1)%3]);
+            //r[positionMod] = (r[(position-2)%3] % r[(position-1)%3]);
+            r[positionMod] = trueMod(r[(position-2)%3], r[(position-1)%3]);
             q[positionMod] = (r[(position-2)%3] / r[(position-1)%3]);
 
         }
@@ -107,10 +105,7 @@ public class RSA {
         u[positionMod] = (u[(position-2)%3] - (q[position%3] * u[(position-1)%3]));
         v[positionMod] = (v[(position-2)%3] - (q[position%3] * v[(position-1)%3]));
 
-        //make sure the result is within the modular limits
-        u[positionMod] = trueMod(u[positionMod], m);
-
-        return u[positionMod];
+        return trueMod(u[positionMod], m);
 
     }
 
@@ -118,20 +113,28 @@ public class RSA {
      * Raise a number, b, to a power, p, modulo m
      * @param b The number to be raised to the power pow (modulo m).
      * @param p The power to raise num by (modulo m).
-     * @param m The mod to work in when performing this calculation.
+     * @param m The modulo to work in when performing this calculation.
      * @return b^p mod m
      * @author Daniel Haluszka
      */
-    public static long modPower(long b, long p, long m) throws IllegalArgumentException {
-
-        //TODO: check for overflow?
+    public static long modPower(long b, long p, long m) throws IllegalArgumentException, ArithmeticException {
 
         //check for invalid input
         if (p < 0) {
 
-            throw new IllegalArgumentException("Given value for p (" + p + ") is not valid: p must be positive");
+            throw new IllegalArgumentException("Given value for p (" + p + ") is not valid: p must non-negative");
 
         }
+
+        if (m < 1) {
+
+            throw new IllegalArgumentException("Given value for m (" + m + ") is not valid: modulo must be > 0");
+
+        }
+
+        //check for overflow
+        //multiplyExact will throw an exception if overflow occurs with the two biggest numbers we could possibly be multiplying
+        Math.multiplyExact((m - 1), (m - 1));
 
         //check for simple cases
         if (p == 0) {
@@ -142,24 +145,32 @@ public class RSA {
 
         if (p == 1) {
 
-            return b%m;
+            return trueMod(b, m);
 
         }
 
-        long result = 1;//11^0
+        long result = 1;
 
-        //multiply b by itself p times, reducing mod m at each step
-        for (int i = 0; i < p; i++) {
+        //use binary shifting to multiply
+        //loop runs for each bit position in p
+        while (p > 0) {
 
-            result *= b;
-            result = (result % m);
+            //if this bit position is set, multiply result by base and reduce mod m
+            if ((p % 2) == 1) {
+
+                result = ((result * b) % m);
+
+            }
+
+            //bitshift p and increment b
+            p = p >> 1;
+            b = ((b * b) % m);
 
         }
 
-        return result;
+        return trueMod(result, m);
 
     }
-    
 
     /**
      * Find the greatest common denominator of two numbers.
@@ -199,10 +210,9 @@ public class RSA {
         long result = e;
 
         //check for negative number
-        while (result < 0) {
+        if (result < 0) {
 
-            //add modulo until positive
-            result += m;
+            result = Math.floorMod(result, m);
 
         }
 
@@ -216,13 +226,14 @@ public class RSA {
         return result;
 
     }
-     /***
+
+    /***
      * Display an array of longs on stdout
      * @param cipher cipher code to be displayed
      * @author Jamie Walder
      */
     public static void show(long[] cipher) {
-    	System.out.println(Arrays.toString(cipher));
+        System.out.println(Arrays.toString(cipher));
     }
     /***
      * Find a random prime number
@@ -234,65 +245,65 @@ public class RSA {
      * @throws Exception an exception thrown if the range does not contain a prime number
      */
     public static long randPrime(int m,int n,java.util.Random rand){
-    	if(m>n) {
-    		throw new IllegalArgumentException("m must be less than n");
-    	}
-    	int original=rand.nextInt(n-m)+m;
-    	//takes care of even 
-    	if(original%2==0) {
-    		original+=1;
-    	}
-    	int go=0;
-    	for(int num=original;go<2;num=(num+2)) {
-    		if(num>n) {
-    			num=m%2==0?m+1:m;
-    		}
-    		if(num==original) {
-    			go++;
-    		}
-    		//an unfortunate consequence of jumping all the evens
-    		if(num==3) {
-    			return num;
-    		}
-    		for(int i=3;i<num;i+=2) {
-    			if(num%i==0) {
-    				break;
-    			}
-    			else if(i==num-2){
-    				return num;
-    			}
-    		}
-    		
-    	}
-    	try {
-			throw new Exception("No Random in given Range");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return -1;
+        if(m>n) {
+            throw new IllegalArgumentException("m must be less than n");
+        }
+        int original=rand.nextInt(n-m)+m;
+        //takes care of even
+        if(original%2==0) {
+            original+=1;
+        }
+        int go=0;
+        for(int num=original;go<2;num=(num+2)) {
+            if(num>n) {
+                num=m%2==0?m+1:m;
+            }
+            if(num==original) {
+                go++;
+            }
+            //an unfortunate consequence of jumping all the evens
+            if(num==3) {
+                return num;
+            }
+            for(int i=3;i<num;i+=2) {
+                if(num%i==0) {
+                    break;
+                }
+                else if(i==num-2){
+                    return num;
+                }
+            }
+
+        }
+        try {
+            throw new Exception("No Random in given Range");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return -1;
     }
     /***
      * Find a random number relatively prime to a given long int
      * @author Jamie Walder
-     * @param n first number 
+     * @param n first number
      * @param rand a random number that is relatively prime to n
      * @return a random number relatively prime to n
      */
     public static long relPrime(long n,java.util.Random rand) {
-    	long num=rand.nextLong();
-    	if(num<0) {
-    		num*=-1;
-    	}
-    	num%=n;
-    	if(num==0) {
-    		num++;
-    	}
-    	
-    	while(gcd(n,num)>1) {
-    		num+=1%n;
-    	}
-    	return num;
+        long num=rand.nextLong();
+        if(num<0) {
+            num*=-1;
+        }
+        num%=n;
+        if(num==0) {
+            num++;
+        }
+
+        while(gcd(n,num)>1) {
+            num+=1%n;
+        }
+        return num;
     }
     /***
      * @author Jamie Walder
@@ -303,25 +314,25 @@ public class RSA {
      */
     public static long toLong(java.lang.String msg,int p) {
         if(msg.length()%2!=0) {
-    		throw new IllegalArgumentException("incoming message should be even in length.");
-    	}
-    	long temp=(int)msg.toCharArray()[p];
-    	temp=temp<<8;
-    	temp+=(int)msg.toCharArray()[p+1];
-    	return temp;
+            throw new IllegalArgumentException("incoming message should be even in length.");
+        }
+        long temp=(int)msg.toCharArray()[p];
+        temp=temp<<8;
+        temp+=(int)msg.toCharArray()[p+1];
+        return temp;
     }
     /***
      * Convert a long to 2 chars
      * @author Jamie Walder
-     * @param x 
+     * @param x
      * @return The string made up two numeric digits representing x
      */
     public static java.lang.String longTo2Chars(long x){
-    	String temp="";
-    	temp+=(char)(x>>8);
-    	x=(long) (x%Math.pow(2, 8));
-    	temp+=(char)((int)x);
-    	return temp;
+        String temp="";
+        temp+=(char)(x>>8);
+        x=(long) (x%Math.pow(2, 8));
+        temp+=(char)((int)x);
+        return temp;
     }
 
 }
