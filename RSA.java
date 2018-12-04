@@ -95,8 +95,7 @@ public class RSA {
             position++;
             positionMod = position % 3;
 
-            //r[positionMod] = (r[(position-2)%3] % r[(position-1)%3]);
-            r[positionMod] = trueMod(r[(position-2)%3], r[(position-1)%3]);
+            r[positionMod] = (r[(position-2)%3] % r[(position-1)%3]);
             q[positionMod] = (r[(position-2)%3] / r[(position-1)%3]);
 
         }
