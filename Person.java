@@ -22,8 +22,8 @@ public class Person extends java.lang.Object {
 	public Person(){
 		//Public Key
 		rand = new Random();
-		p = RSA.randPrime(256, 300, rand);
-		while((q = RSA.randPrime(256, 300, rand))==p);
+		p = RSA.randPrime(256, 32768, rand);
+		while((q = RSA.randPrime(256, 32768, rand))==p);
 		m = p*q;
 		n = (p-1)*(q-1);
 		e = RSA.relPrime(n, rand);
