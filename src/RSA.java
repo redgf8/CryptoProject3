@@ -1,8 +1,10 @@
 import java.util.Arrays;
 
 public class RSA {
+
     public static void main (String args[])
     {
+
         Person Alice = new Person();
         Person Bob = new Person();
 
@@ -27,9 +29,6 @@ public class RSA {
 
         System.out.println ("Alice decodes and reads: " + Alice.decrypt (cipher));
 
-
-
-
     }
 
     /**
@@ -43,29 +42,21 @@ public class RSA {
 
         //check for invalid input
         if (m < 1) {
-
             throw new IllegalArgumentException("Given value for m (" + m + ") is not valid: modulo must be > 0");
-
         }
 
         if (e < 1) {
-
             throw new IllegalArgumentException("Given value for e (" + e + ") is not valid: number must be > 0");
-
         }
 
         //inverse only exists if e and m are relatively prime
         if (gcd(e, m) != 1) {
-
             return -1;
-
         }
 
         //check for simple case
         if (m == 1) {
-
             return 0;
-
         }
 
         //only ever need to reference two spaces back at most
@@ -120,15 +111,11 @@ public class RSA {
 
         //check for invalid input
         if (p < 0) {
-
             throw new IllegalArgumentException("Given value for p (" + p + ") is not valid: p must non-negative");
-
         }
 
         if (m < 1) {
-
             throw new IllegalArgumentException("Given value for m (" + m + ") is not valid: modulo must be > 0");
-
         }
 
         //check for overflow
@@ -137,15 +124,11 @@ public class RSA {
 
         //check for simple cases
         if (p == 0) {
-
             return 1;
-
         }
 
         if (p == 1) {
-
             return trueMod(b, m);
-
         }
 
         long result = 1;
@@ -153,18 +136,13 @@ public class RSA {
         //use binary shifting to multiply
         //loop runs for each bit position in p
         while (p > 0) {
-
             //if this bit position is set, multiply result by base and reduce mod m
             if ((p % 2) == 1) {
-
                 result = ((result * b) % m);
-
             }
-
             //bitshift p and increment b
             p = p >> 1;
             b = ((b * b) % m);
-
         }
 
         return trueMod(result, m);
@@ -232,8 +210,11 @@ public class RSA {
      * @author Jamie Walder
      */
     public static void show(long[] cipher) {
+
         System.out.println(Arrays.toString(cipher));
+
     }
+
     /***
      * Find a random prime number
      * @author Jamie Walder
@@ -244,6 +225,7 @@ public class RSA {
      * @throws Exception an exception thrown if the range does not contain a prime number
      */
     public static long randPrime(int m,int n,java.util.Random rand){
+
         if(m>n) {
             throw new IllegalArgumentException("m must be less than n");
         }
@@ -281,7 +263,9 @@ public class RSA {
             e.printStackTrace();
         }
         return -1;
+
     }
+
     /***
      * Find a random number relatively prime to a given long int
      * @author Jamie Walder
@@ -290,6 +274,7 @@ public class RSA {
      * @return a random number relatively prime to n
      */
     public static long relPrime(long n,java.util.Random rand) {
+
         long num=rand.nextLong();
         if(num<0) {
             num*=-1;
@@ -303,7 +288,9 @@ public class RSA {
             num+=1%n;
         }
         return num;
+
     }
+
     /***
      * @author Jamie Walder
      * Convert two numeric chars to long int
@@ -312,6 +299,7 @@ public class RSA {
      * @return the two digit number beginning at position p of msg as a long int.
      */
     public static long toLong(java.lang.String msg,int p) {
+
         if(msg.length()%2!=0) {
             throw new IllegalArgumentException("incoming message should be even in length.");
         }
@@ -319,7 +307,9 @@ public class RSA {
         temp=temp<<8;
         temp+=(int)msg.toCharArray()[p+1];
         return temp;
+
     }
+
     /***
      * Convert a long to 2 chars
      * @author Jamie Walder
@@ -327,11 +317,13 @@ public class RSA {
      * @return The string made up two numeric digits representing x
      */
     public static java.lang.String longTo2Chars(long x){
+
         String temp="";
         temp+=(char)(x>>8);
         x=(long) (x%Math.pow(2, 8));
         temp+=(char)((int)x);
         return temp;
+
     }
 
 }

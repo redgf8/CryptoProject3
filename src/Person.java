@@ -20,6 +20,7 @@ public class Person extends java.lang.Object {
      * @throws Exception
      */
     public Person(){
+
         //Public Key
         rand = new Random();
         p = RSA.randPrime(256, 32768, rand);
@@ -30,6 +31,7 @@ public class Person extends java.lang.Object {
 
         //Private Key
         d = RSA.inverse(e, n);
+
     }
 
     /**
@@ -55,6 +57,7 @@ public class Person extends java.lang.Object {
      * @return
      */
     public long[] encryptTo(String msg, Person recipient){
+
         if(msg.length()%2!=0) {
             msg+=(char)0;
         }
@@ -67,6 +70,7 @@ public class Person extends java.lang.Object {
             counter++;
         }
         return cipher;
+
     }
 
     /**
@@ -75,12 +79,14 @@ public class Person extends java.lang.Object {
      * @return
      */
     public String decrypt (long[] message) {
+
         String msg = new String();
         for(int i = 0; i < message.length; i++) {
             message[i] = RSA.modPower(message[i], d, m);
             msg = msg + RSA.longTo2Chars(message[i]);
         }
         return msg;
+
     }
 
 
